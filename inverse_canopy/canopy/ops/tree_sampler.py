@@ -123,12 +123,12 @@ class LogicTreeBroadcastSampler(Sampler):
         input_packed_bits_ = self._generate_bernoulli_broadcast_no_batch(probs=probs, seed=seed,)
         output_packed_bits_ = self._logic_fn(input_packed_bits_)
         ones_ = self._count(output_packed_bits_)
-        means_ = tf.cast(ones_, dtype=self._acc_dtype) / self._num_sampled_bits_in_batch
-        p05_, p95_ = self._tally(means_)
-        return p05_, means_, p95_
+        mean_of_mean = tf.cast(ones_, dtype=self._acc_dtype) / self._num_sampled_bits_in_batch
+        p05_of_mean, p95_of_mean = self._tally(mean_of_mean)
+        return p05_of_mean, mean_of_mean, p95_of_mean
 
     def tally_from_samples(self, samples):
         ones_ = self._count(samples)
-        means_ = tf.cast(ones_, dtype=self._acc_dtype) / self._num_sampled_bits_in_batch
-        p05_, p95_ = self._tally(means_)
-        return p05_, means_, p95_
+        mean_of_mean = tf.cast(ones_, dtype=self._acc_dtype) / self._num_sampled_bits_in_batch
+        p05_of_mean, p95_of_mean = self._tally(mean_of_mean)
+        return p05_of_mean, mean_of_mean, p95_of_mean

@@ -9,7 +9,7 @@ from inverse_canopy.canopy.ops.sampler import Sampler
 from inverse_canopy.canopy.parser import parse_fault_tree
 
 
-def generate_basic_event_samples(rng:tf.random.Generator, probabilities: List[float], batch_size: int, sample_size: int, sampler_dtype=tf.float32, bitpack_dtype=tf.uint8) -> tf.Tensor:
+def generate_basic_event_samples(rng:tf.random.Generator, probabilities: List[float], batch_size: int, sample_size: int, sampler_dtype=tf.float64, bitpack_dtype=tf.uint8) -> tf.Tensor:
     # Create a tensor of probabilities with shape [num_events, batch_size, sample_size]
     probs = tf.constant(probabilities, dtype=sampler_dtype)
     num_events = tf.shape(probs)[0]
@@ -22,7 +22,7 @@ def generate_basic_event_samples(rng:tf.random.Generator, probabilities: List[fl
     return samples  # Shape: [num_events, batch_size, sample_size]
 
 
-@tf.function(jit_compile=True)
+# @tf.function(jit_compile=True, reduce_retracing=True)
 def build_tf_graph(presorted_nodes, rng: tf.random.Generator, batch_size: tf.int32, sample_size: tf.int32):
 
     basic_event_probs: List[float] = presorted_nodes["basic_events"]["probabilities"]
@@ -64,7 +64,6 @@ def quantify(xml_file_path: str, num_batches: int, batch_size: int, sample_size:
 
     rng = tf.random.Generator.from_non_deterministic_state()
 
-    @tf.function(jit_compile=False)
     def run(nodes, num_batches_: int, batch_size_: int, sample_size_: int) -> None:
         for _ in tf.range(num_batches_):
             graph_outputs = build_tf_graph(presorted_nodes=nodes, rng=rng, batch_size=batch_size_, sample_size=sample_size_)
@@ -88,8 +87,12 @@ def setup_env_vars():
 if __name__ == '__main__':
     setup_env_vars()
 
-    file_path = "../../tests/fixtures/synthetic-openpsa/ft-openpsa-800Gates.xml"
-    num_batches_ = 10
-    batch_size_ = 2
-    sample_size_ = 2 ** 10
-    quantify(xml_file_path=file_path, num_batches=num_batches_, batch_size=batch_size_, sample_size=sample_size_)
+    with tf.device("/cpu:0"):
+        #file_path = "../../tests/fixtures/synthetic-openpsa/ft-openpsa-800Gates.xml"
+        file_path = "/home/earthperson/projects/openpra-monorepo/fixtures/models/synthetic-openpsa-models/models/c1-P_0.01-0.05/ft_c1-P_0.01-0.05_2000.xml"
+        file_path = "/home/earthperson/projects/inverse-canopy/tests/fixtures/benchexec-models/models/openpsa/ft-openpsa-1000-01.xml"
+        #"ft_c1-P_0.01-0.05_1000.xml"
+        num_batches_ = 10
+        batch_size_ = 3800
+        sample_size_ = 10
+        quantify(xml_file_path=file_path, num_batches=num_batches_, batch_size=batch_size_, sample_size=sample_size_)

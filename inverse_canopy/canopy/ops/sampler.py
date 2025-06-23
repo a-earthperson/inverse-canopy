@@ -28,14 +28,14 @@ class Sampler(tf.Module):
         return tf.dtypes.as_dtype(tensor_type).size * 8
 
     @staticmethod
-    def _compute_sample_shape(probs: tf.Tensor,  # [batch_size, num_events].
+    def _compute_sample_shape(probs: tf.Tensor,  # [num_events, batch_size].
                               n_sample_packs_per_probability: tf.int32,
                               bitpack_dtype: tf.DType,
                               ) -> Tuple[List, List]:
         """
         Generates bit-packed Bernoulli random variables based on input probabilities.
             Args:
-            probs (tf.Tensor): Tensor of probabilities with shape [batch_size, num_events].
+            probs (tf.Tensor): Tensor of probabilities with shape [num_events, batch_size].
             n_sample_packs_per_probability (int): Number of sample packs to generate per probability.
             bitpack_dtype (tf.DType): Data type for bit-packing (e.g., tf.uint8).
         """

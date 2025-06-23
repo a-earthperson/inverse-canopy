@@ -1,8 +1,12 @@
 import tensorflow as tf
 
+
+@tf.function(jit_compile=True, reduce_retracing=True)
 def bitwise_nary_op(bitwise_op, inputs, name: str):
     """
-    Efficiently applies the n-ary bitwise op across the specified axis.
+    Naively applies the n-ary bitwise op across the specified axis.
+
+    @note: clobbers the first input.
 
     Args:
         bitwise_op (function): The bitwise reduction over the input tensor across the num_events dimension. can be one of `tf.bitwise.bitwise_or`, tf.bitwise.bitwise_and`, `tf.bitwise.bitwise_xor`
